@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"github.com/arangodb/go-driver"
 	arangohttp "github.com/arangodb/go-driver/http"
+	pg_model "github.com/denysvitali/social/backend/pkg/models/postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Server struct {
@@ -15,6 +18,7 @@ type Server struct {
 
 	graphConn driver.Client
 	graphDb   driver.Database
+	pgDB      *gorm.DB
 }
 
 type ArangoConfig struct {
@@ -26,18 +30,53 @@ type ArangoConfig struct {
 }
 
 type Config struct {
-	Arango ArangoConfig
+	Arango      ArangoConfig
+	PostgresDSN string
+
 	Logger *logrus.Logger
 }
 
 func New(config Config) (*Server, error) {
+	if config.Logger == nil {
+		config.Logger = logrus.New()
+		config.Logger.Warnf("nil logger passed in config, creating a new logger")
+	}
+
+	c, db, err := setupArango(config)
+	if err != nil {
+		return nil, fmt.Errorf("unable to set-up ArangoDB")
+	}
+
+	pgdb, err := setupPostgres(config)
+	if err != nil {
+		return nil, fmt.Errorf("unable to set-up PostgreSQL")
+	}
+
+	s := Server{
+		e:         gin.New(),
+		graphConn: c,
+		graphDb:   db,
+		pgDB:      pgdb,
+		logger:    config.Logger,
+	}
+
+	s.init()
+
+	return &s, nil
+}
+
+func setupPostgres(config Config) (*gorm.DB, error) {
+	return gorm.Open(postgres.Open(config.PostgresDSN), &gorm.Config{})
+}
+
+func setupArango(config Config) (driver.Client, driver.Database, error) {
 	conn, err := arangohttp.NewConnection(
 		arangohttp.ConnectionConfig{
 			Endpoints: config.Arango.Endpoints,
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create arango HTTP connection: %v", err)
+		return nil, nil, fmt.Errorf("unable to create arango HTTP connection: %v", err)
 	}
 
 	c, err := driver.NewClient(driver.ClientConfig{
@@ -49,29 +88,14 @@ func New(config Config) (*Server, error) {
 		SynchronizeEndpointsInterval: 0,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("unable to create ArangoDB client: %v", err)
-	}
-
-	if config.Logger == nil {
-		config.Logger = logrus.New()
-		config.Logger.Warnf("nil logger passed in config, creating a new logger")
+		return nil, nil, fmt.Errorf("unable to create ArangoDB client: %v", err)
 	}
 
 	db, err := c.Database(context.TODO(), config.Arango.Database)
 	if err != nil {
-		return nil, fmt.Errorf("unable to get ArangoDB database: %v", err)
+		return nil, nil, fmt.Errorf("unable to get ArangoDB database: %v", err)
 	}
-
-	s := Server{
-		e:         gin.New(),
-		graphConn: c,
-		graphDb:   db,
-		logger:    config.Logger,
-	}
-
-	s.init()
-
-	return &s, nil
+	return c, db, nil
 }
 
 func (s *Server) Listen(addr ...string) error {
@@ -79,6 +103,21 @@ func (s *Server) Listen(addr ...string) error {
 }
 
 func (s *Server) init() {
+	// init db
+	s.initPostgreSQL()
+
 	g := s.e.Group("/api/v1")
 	s.initAPIv1(g)
+}
+
+func (s *Server) initPostgreSQL() {
+	for _, v := range []any{
+		&pg_model.User{},
+		&pg_model.Post{},
+	} {
+		err := s.pgDB.AutoMigrate(v)
+		if err != nil {
+			s.logger.Errorf("unable to automigrate %t: %v", v, err)
+		}
+	}
 }

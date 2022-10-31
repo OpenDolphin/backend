@@ -13,7 +13,9 @@ var args struct {
 	ArangoUsername  string   `arg:"--arango-username,env:ARANGO_USERNAME"`
 	ArangoPassword  string   `arg:"--arango-password,env:ARANGO_PASSWORD"`
 	ArangoDatabase  string   `arg:"--arango-database,env:ARANGO_DATABASE"`
-	ListenAddr      string   `arg:"--listen-addr,env:LISTEN_ADDR"`
+	PostgresDSN     string   `arg:"--postgres-dsn,env:POSTGRESQL_DSN"`
+
+	ListenAddr string `arg:"--listen-addr,env:LISTEN_ADDR"`
 }
 
 var logger = logrus.New()
@@ -32,7 +34,8 @@ func main() {
 			Password:  args.ArangoPassword,
 			Database:  args.ArangoDatabase,
 		},
-		Logger: logger,
+		PostgresDSN: args.PostgresDSN,
+		Logger:      logger,
 	})
 
 	if err != nil {

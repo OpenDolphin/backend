@@ -2,19 +2,24 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/arangodb/go-driver"
-	"github.com/denysvitali/social/backend/pkg/models"
+	"github.com/denysvitali/social/backend/pkg/models/arango"
+	pg_model "github.com/denysvitali/social/backend/pkg/models/postgres"
 	v1requests "github.com/denysvitali/social/backend/pkg/requests/v1"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 )
 
 func (s *Server) initAPIv1(g *gin.RouterGroup) {
-	g.GET("/users/by_username/:username", s.apiV1UserByUsername)
-	g.GET("/users/:id", s.apiV1Users)
 	g.POST("/users", s.apiV1CreateUser)
+	g.GET("/users/:id", s.apiV1Users)
+	g.GET("/users/by-username/:username", s.apiV1UserByUsername)
 	g.POST("/users/:id/follows/:target_id", s.apiV1SetUserFollows)
+
+	g.GET("/posts/:id", s.apiV1PostById)
 }
 
 func (s *Server) apiV1Users(c *gin.Context) {
@@ -56,6 +61,24 @@ func (s *Server) apiV1UserByUsername(c *gin.Context) {
 		)
 		return
 	}
+
+	var user pg_model.User
+	tx := s.pgDB.First(&user, "username = ?", usernameKey)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			s.notFound(c, "user not found")
+			return
+		}
+		s.internalServerError(c, "unable to get user by username: %v", tx.Error)
+		return
+	}
+
+	if user.Deleted {
+		s.notFound(c, "user doesn't exist anymore")
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
 
 func (s *Server) apiV1SetUserFollows(c *gin.Context) {
@@ -164,7 +187,7 @@ func (s *Server) apiV1CreateUser(c *gin.Context) {
 		return
 	}
 
-	meta, err := coll.CreateDocument(ctx, models.User{
+	meta, err := coll.CreateDocument(ctx, arango.User{
 		Username:  req.Username,
 		FirstName: req.FirstName,
 		LastName:  req.LastName,

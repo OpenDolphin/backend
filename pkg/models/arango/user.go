@@ -1,4 +1,4 @@
-package models
+package arango
 
 type User struct {
 	Username  string `json:"username"`
