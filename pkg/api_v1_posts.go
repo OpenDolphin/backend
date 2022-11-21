@@ -16,7 +16,10 @@ func (s *Server) apiV1PostById(c *gin.Context) {
 	}
 
 	var p pgmodel.Post
-	tx := s.pgDB.Preload("Author").First(&p, "id = ?", id)
+	tx := s.pgDB.
+		Preload("Author").
+		Preload("Tags").
+		First(&p, "id = ?", id)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			s.notFound(c, "post not found")

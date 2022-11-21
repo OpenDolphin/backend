@@ -20,6 +20,8 @@ func (s *Server) initAPIv1(g *gin.RouterGroup) {
 	g.POST("/users/:id/follows/:target_id", s.apiV1SetUserFollows)
 
 	g.GET("/posts/:id", s.apiV1PostById)
+	g.GET("/tags/:text", s.apiV1TagsByText)
+	g.GET("/tags/:text/posts", s.apiV1TagsGetPosts)
 }
 
 func (s *Server) apiV1Users(c *gin.Context) {

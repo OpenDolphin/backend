@@ -114,10 +114,11 @@ func (s *Server) initPostgreSQL() {
 	for _, v := range []any{
 		&pg_model.User{},
 		&pg_model.Post{},
+		&pg_model.Tag{},
 	} {
 		err := s.pgDB.AutoMigrate(v)
 		if err != nil {
-			s.logger.Errorf("unable to automigrate %t: %v", v, err)
+			s.logger.Fatalf("unable to automigrate %t: %v", v, err)
 		}
 	}
 }

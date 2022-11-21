@@ -14,6 +14,8 @@ type User struct {
 	Verified       bool      `json:"verified"`
 	Deleted        bool      `json:"-"`
 
+	MentionedIn []Post `gorm:"many2many:user_mention;" json:"mentionedIn"`
+
 	// HasMany relations
 	Posts []Post `gorm:"foreignKey:AuthorID" json:"posts,omitempty"`
 }

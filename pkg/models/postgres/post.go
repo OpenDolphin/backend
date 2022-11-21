@@ -13,6 +13,9 @@ type Post struct {
 	ReshareCount uint32 `json:"reshareCount"`
 	ReplyCount   uint32 `json:"replyCount"`
 
+	UserMention []User `gorm:"many2many:user_mention;" json:"userMention"`
+	Tags        []Tag  `gorm:"many2many:post_tags;" json:"tags"`
+
 	Author   *User  `json:"author,omitempty"`
 	AuthorID uint64 `json:"authorId"`
 	Deleted  bool   `json:"-"`
