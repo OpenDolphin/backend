@@ -80,7 +80,7 @@ func (s *Server) apiV1ProfilePictureByUsername(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, pp)
+	c.Redirect(http.StatusTemporaryRedirect, pp.Url)
 }
 
 var NotImplementedError = map[string]string{
