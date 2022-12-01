@@ -6,6 +6,7 @@ import (
 	"github.com/arangodb/go-driver"
 	arangohttp "github.com/arangodb/go-driver/http"
 	pg_model "github.com/denysvitali/social/backend/pkg/models/postgres"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
@@ -15,10 +16,7 @@ import (
 type Server struct {
 	logger *logrus.Logger
 	e      *gin.Engine
-
-	graphConn driver.Client
-	graphDb   driver.Database
-	pgDB      *gorm.DB
+	pgDB   *gorm.DB
 }
 
 type ArangoConfig struct {
@@ -42,22 +40,15 @@ func New(config Config) (*Server, error) {
 		config.Logger.Warnf("nil logger passed in config, creating a new logger")
 	}
 
-	c, db, err := setupArango(config)
-	if err != nil {
-		return nil, fmt.Errorf("unable to set-up ArangoDB")
-	}
-
 	pgdb, err := setupPostgres(config)
 	if err != nil {
 		return nil, fmt.Errorf("unable to set-up PostgreSQL")
 	}
 
 	s := Server{
-		e:         gin.New(),
-		graphConn: c,
-		graphDb:   db,
-		pgDB:      pgdb,
-		logger:    config.Logger,
+		e:      gin.New(),
+		pgDB:   pgdb,
+		logger: config.Logger,
 	}
 
 	s.init()
@@ -106,6 +97,10 @@ func (s *Server) init() {
 	// init db
 	s.initPostgreSQL()
 
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"*"}
+	s.e.Use(cors.New(corsConfig))
+
 	g := s.e.Group("/api/v1")
 	s.initAPIv1(g)
 }
@@ -113,6 +108,7 @@ func (s *Server) init() {
 func (s *Server) initPostgreSQL() {
 	for _, v := range []any{
 		&pg_model.User{},
+		&pg_model.ProfilePicture{},
 		&pg_model.Post{},
 		&pg_model.Tag{},
 	} {

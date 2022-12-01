@@ -13,7 +13,7 @@ var args struct {
 	ArangoUsername  string   `arg:"--arango-username,env:ARANGO_USERNAME"`
 	ArangoPassword  string   `arg:"--arango-password,env:ARANGO_PASSWORD"`
 	ArangoDatabase  string   `arg:"--arango-database,env:ARANGO_DATABASE"`
-	PostgresDSN     string   `arg:"--postgres-dsn,env:POSTGRESQL_DSN"`
+	PostgresDSN     string   `arg:"--postgres-dsn,env:DATABASE_URL"`
 
 	ListenAddr string `arg:"--listen-addr,env:LISTEN_ADDR"`
 }
@@ -28,12 +28,6 @@ func main() {
 	}
 
 	s, err := server.New(server.Config{
-		Arango: server.ArangoConfig{
-			Endpoints: args.ArangoEndpoints,
-			Username:  args.ArangoUsername,
-			Password:  args.ArangoPassword,
-			Database:  args.ArangoDatabase,
-		},
 		PostgresDSN: args.PostgresDSN,
 		Logger:      logger,
 	})
