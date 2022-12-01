@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type Server struct {
@@ -44,6 +45,8 @@ func New(config Config) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to set-up PostgreSQL")
 	}
+
+	pgdb.Logger = logger.Default.LogMode(logger.Info)
 
 	s := Server{
 		e:      gin.New(),

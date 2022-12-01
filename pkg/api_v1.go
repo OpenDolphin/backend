@@ -67,10 +67,11 @@ func (s *Server) apiV1ProfilePictureByUsername(c *gin.Context) {
 	}
 
 	var pp pg_model.ProfilePicture
-	tx := s.pgDB.First(&pp).
-		Joins("inner join users ON users.id = profile_picture.user_id").
+	tx := s.pgDB.
+		Joins("left join users ON users.id = profile_pictures.user_id").
 		Where("users.username = ?", usernameKey).
-		Order("profile_picture.last_updated DESC")
+		First(&pp).
+		Order("profile_pictures.last_updated DESC")
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			s.notFound(c, "not found")
