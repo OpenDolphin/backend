@@ -15,6 +15,8 @@ var args struct {
 	ArangoDatabase  string   `arg:"--arango-database,env:ARANGO_DATABASE"`
 	PostgresDSN     string   `arg:"--postgres-dsn,env:DATABASE_URL"`
 
+	IsDemo bool `arg:"env:DEMO_MODE" default:"false"`
+
 	ListenAddr string `arg:"--listen-addr,env:LISTEN_ADDR"`
 }
 
@@ -30,6 +32,7 @@ func main() {
 	s, err := server.New(server.Config{
 		PostgresDSN: args.PostgresDSN,
 		Logger:      logger,
+		DemoMode:    args.IsDemo,
 	})
 
 	if err != nil {

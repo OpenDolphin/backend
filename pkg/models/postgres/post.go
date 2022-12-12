@@ -1,20 +1,18 @@
 package pg_model
 
-import "time"
-
 type Post struct {
-	ID        uint64    `gorm:"primaryKey" json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	Content   string    `json:"content"`
+	// ID is an ULID that contains the post creation date and some randomness
+	ID      []byte `gorm:"primaryKey,type:bytea" json:"id"`
+	Content string `json:"content"`
 
 	ParentPost   *Post  `json:"parentPost,omitempty"`
-	ParentPostID uint64 `json:"parentPostID,omitempty"`
-
-	ReshareCount uint32 `json:"reshareCount"`
-	ReplyCount   uint32 `json:"replyCount"`
+	ParentPostID []byte `json:"parentPostID,type:bytea,omitempty"`
 
 	UserMention []User `gorm:"many2many:user_mention;" json:"userMention"`
 	Tags        []Tag  `gorm:"many2many:post_tags;" json:"tags"`
+	LikedBy     []User `gorm:"many2many:user_likes" json:"liked_by,omitempty"`
+
+	Likes uint64 `json:"likes"`
 
 	Author   *User  `json:"author,omitempty"`
 	AuthorID uint64 `json:"authorId"`

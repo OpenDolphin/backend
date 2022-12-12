@@ -13,12 +13,16 @@ import (
 func (s *Server) initAPIv1(g *gin.RouterGroup) {
 	g.POST("/users", s.apiV1CreateUser)
 	g.GET("/users/@:username", s.apiV1UserByUsername)
-	g.GET("/users/@:username/profile_picture", s.apiV1ProfilePictureByUsername)
 	g.GET("/users/:id", s.apiV1GetUserById)
+	g.GET("/users/@:username/profile_picture", s.apiV1ProfilePictureByUsername)
 	g.POST("/users/:id/follows/:target_id", s.apiV1SetUserFollows)
 
-	g.GET("/posts/@:username", s.apiV1PostsByAuthorUsername)
-	g.GET("/posts/:id", s.apiV1PostsByAuthorId)
+	// User Posts
+	g.GET("/users/@:username/posts", s.apiV1PostsByAuthorUsername)
+	g.GET("/users/:id/posts", s.apiV1PostsByAuthorId)
+
+	g.GET("/posts", s.apiV1GetPosts)
+
 	g.GET("/tags/:text", s.apiV1TagsByText)
 	g.GET("/tags/:text/posts", s.apiV1TagsGetPosts)
 }
