@@ -14,7 +14,7 @@ type Post struct {
 
 	Likes uint64 `json:"likes"`
 
-	Author   *User  `json:"author,omitempty"`
+	Author   *User  `json:"author,omitempty" gorm:"foreignkey:AuthorID"`
 	AuthorID uint64 `json:"authorId"`
 	Deleted  bool   `json:"-"`
 }

@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"github.com/denysvitali/social/backend/pkg/models/api"
 	pgmodel "github.com/denysvitali/social/backend/pkg/models/postgres"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -15,11 +16,12 @@ func (s *Server) apiV1PostsByAuthorUsername(c *gin.Context) {
 		return
 	}
 
-	var p pgmodel.Post
+	var posts []pgmodel.Post
 	tx := s.pgDB.
-		Preload("Author").
-		Preload("Tags").
-		First(&p, "username = ?", username)
+		Model(&pgmodel.Post{}).
+		Joins("JOIN users ON posts.author_id = users.id").
+		Where("users.username = ?", username).
+		Find(&posts)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			s.notFound(c, "post not found")
@@ -29,7 +31,12 @@ func (s *Server) apiV1PostsByAuthorUsername(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, p)
+	var apiPosts []api.Post
+	for _, v := range posts {
+		apiPosts = append(apiPosts, getApiPost(v))
+	}
+
+	c.JSON(http.StatusOK, apiPosts)
 }
 
 func (s *Server) apiV1PostsByAuthorId(c *gin.Context) {
@@ -39,11 +46,11 @@ func (s *Server) apiV1PostsByAuthorId(c *gin.Context) {
 		return
 	}
 
-	var p pgmodel.Post
+	var posts []pgmodel.Post
 	tx := s.pgDB.
 		Preload("Author").
 		Preload("Tags").
-		First(&p, "id = ?", id)
+		Find(&posts, "author.id = ?", id)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			s.notFound(c, "post not found")
@@ -53,5 +60,11 @@ func (s *Server) apiV1PostsByAuthorId(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, p)
+	var apiPosts []api.Post
+
+	for _, v := range posts {
+		apiPosts = append(apiPosts, getApiPost(v))
+	}
+
+	c.JSON(http.StatusOK, posts)
 }

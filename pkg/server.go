@@ -134,6 +134,7 @@ func (s *Server) initPostgreSQL() {
 	for _, v := range []any{
 		&pg_model.User{},
 		&pg_model.ProfilePicture{},
+		&pg_model.BioPicture{},
 		&pg_model.Post{},
 		&pg_model.Tag{},
 	} {
@@ -209,6 +210,61 @@ func (s *Server) apiV1GetPosts(c *gin.Context) {
 	c.JSON(http.StatusOK, postsResponse)
 }
 
+func (s *Server) apiV1GetSinglePost(c *gin.Context) {
+	var post pg_model.Post
+	postId := c.Param("id")
+	if postId == "" {
+		s.badRequest(c, "id is empty", "you must provide a post id")
+		return
+	}
+
+	u, err := ulid.Parse(postId)
+	if err != nil {
+		s.badRequest(c, "invalid ULID", "you must provide a valid ULID")
+		return
+	}
+
+	tx := s.pgDB.
+		Preload("Author").
+		Model(pg_model.Post{}).
+		Joins("INNER JOIN user_likes ON user_likes.post_id = posts.id").
+		Group("posts.id").
+		Select("posts.*, COUNT(user_likes.post_id) AS likes").
+		Where("posts.id=?", u).
+		Find(&post)
+	if tx.Error != nil {
+		s.internalServerError(c, "unable to fetch posts: %v", tx.Error)
+		return
+	}
+
+	if tx.RowsAffected == 0 {
+		s.notFound(c, "post not found")
+		return
+	}
+
+	// Get Author
+	a := s.getAuthor(post)
+	postsResponse := api.PostsResponse{
+		Posts: []api.Post{getApiPost(post)},
+		Users: []api.User{a},
+	}
+
+	c.JSON(http.StatusOK, postsResponse)
+}
+
+func getApiPost(p pg_model.Post) api.Post {
+	var ulidBytes [16]byte
+	copy(ulidBytes[:], p.ID[:16])
+	pUlid := ulid.ULID(ulidBytes)
+	return api.Post{
+		ID:        pUlid.String(),
+		Content:   p.Content,
+		Likes:     p.Likes,
+		Author:    p.AuthorID,
+		CreatedAt: time.Unix(int64(pUlid.Time()/1000), 0),
+	}
+}
+
 func (s *Server) addDemoData() error {
 
 	tx := s.pgDB.Raw("TRUNCATE users CASCADE").Scan(nil)
@@ -226,4 +282,16 @@ func (s *Server) addDemoData() error {
 		return err
 	}
 	return nil
+}
+
+func (s *Server) getAuthor(post pg_model.Post) api.User {
+	if post.Author == nil {
+		return api.User{}
+	}
+	return api.User{
+		ID:          post.Author.ID,
+		DisplayName: post.Author.DisplayName,
+		Username:    post.Author.Username,
+		Verified:    post.Author.Verified,
+	}
 }

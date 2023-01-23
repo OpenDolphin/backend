@@ -14,6 +14,7 @@ func (s *Server) createDemoUsers() error {
 		Username    string
 		DisplayName string
 		Bio         string
+		BioPic      string
 		ProfilePic  string
 		Verified    bool
 	}
@@ -21,44 +22,57 @@ func (s *Server) createDemoUsers() error {
 	users := []inputUser{
 		{
 			ID:          1,
-			Username:    "pdoe",
-			DisplayName: "Pierre Doe",
+			Username:    "jdoe",
+			DisplayName: "John Doe",
 			Bio:         "Just a random guy testing out this platform",
-			ProfilePic:  unsplash.GetProfilePicture("0J9l9xRyMSo"),
+			BioPic:      unsplash.GetBioPic("ukvgqriuOgo"),
+			ProfilePic:  unsplash.GetProfilePicture("lETfyhB8g4Q"),
 			Verified:    true,
 		},
 		{
 			ID:          2,
-			Username:    "jfadel",
-			DisplayName: "Johanna Fadel",
-			Bio: "ust a small town girl living in a lonely world. Posting stuff about life, love, " +
-				"and all the adventures in between.",
-			ProfilePic: unsplash.GetProfilePicture("AJIqZDAUD7A"),
-			Verified:   true,
+			Username:    "sjohnson",
+			DisplayName: "Samantha Johnson",
+			Bio:         "Marketing professional and social media enthusiast",
+			BioPic:      unsplash.GetBioPic("Nyvq2juw4_o"),
+			ProfilePic:  unsplash.GetProfilePicture("O3ymvT7Wf9U"),
+			Verified:    true,
 		},
 		{
 			ID:          3,
-			Username:    "sarahj",
-			DisplayName: "Sarah Johnson",
-			Bio:         "Writer, reader, and tea lover. Sharing my thoughts and adventures on this platform.",
-			ProfilePic:  unsplash.GetProfilePicture("rDEOVtE7vOs"),
+			Username:    "mwilson",
+			DisplayName: "Mike Wilson",
+			Bio:         "Professional photographer and travel blogger",
+			BioPic:      unsplash.GetBioPic("LY1eyQMFeyo"),
+			ProfilePic:  unsplash.GetProfilePicture("hh3ViD0r0Rc"),
 			Verified:    false,
 		},
 		{
 			ID:          4,
-			Username:    "mikem",
-			DisplayName: "Mike Mitchell",
-			Bio:         "Tech enthusiast, gamer, and movie buff. Sharing my love for all things geeky on this platform.",
-			ProfilePic:  unsplash.GetProfilePicture("iFgRcqHznqg"),
+			Username:    "paula_g",
+			DisplayName: "Paula Garcia",
+			Bio:         "Entrepreneur and business owner",
+			BioPic:      unsplash.GetBioPic("99SXcea3uOk"),
+			ProfilePic:  unsplash.GetProfilePicture("cUKy1J3wzqg"),
 			Verified:    true,
 		},
 		{
 			ID:          5,
-			Username:    "katieb",
-			DisplayName: "Katie Brown",
-			Bio:         "Traveler, foodie, and dog mom. Sharing my adventures and delicious finds on this platform.",
-			ProfilePic:  unsplash.GetProfilePicture("O3ymvT7Wf9U"),
+			Username:    "tjones",
+			DisplayName: "Tina Jones",
+			Bio:         "Freelance writer and book lover",
+			BioPic:      unsplash.GetBioPic("f4845LpnSbs"),
+			ProfilePic:  unsplash.GetProfilePicture("zNWlX5Sw9a4"),
 			Verified:    false,
+		},
+		{
+			ID:          6,
+			Username:    "samantha_j",
+			DisplayName: "Samantha Johnson",
+			Bio:         "Marketing professional and social media enthusiast",
+			BioPic:      unsplash.GetBioPic("KEHVSsRtnL0"),
+			ProfilePic:  unsplash.GetProfilePicture("-zqoE7jnQgw"),
+			Verified:    true,
 		},
 	}
 
@@ -71,6 +85,11 @@ func (s *Server) createDemoUsers() error {
 			ProfilePictures: []pg_model.ProfilePicture{
 				{
 					Url: u.ProfilePic,
+				},
+			},
+			BiographyPictures: []pg_model.BioPicture{
+				{
+					Url: u.BioPic,
 				},
 			},
 			Verified: u.Verified,
@@ -93,22 +112,52 @@ func (s *Server) createDemoPosts() error {
 	}
 	posts := []post{
 		{
-			ID:      "01GKF52B2HRVS4NWNY98M3D6RF",
+			ID:      "01GQGDW0E19PRG21S0DWS090X0",
 			Author:  1,
-			LikedBy: []uint64{1, 2, 5},
-			Content: "It's good to be back!",
-		},
-		{
-			ID:      "01GM3FZQB60JP3W1A8MV6TFHGZ",
-			Author:  2,
-			LikedBy: []uint64{1},
-			Content: "About to enjoy the sunset 🌇",
-		},
-		{
-			ID:      "01GM3GNC8RCC0B1C6HXXWB82W0",
-			Author:  3,
 			LikedBy: []uint64{2, 5},
-			Content: "Anyone wanting to meet for a ski-trip?",
+			Content: "Just finished a great hike in the mountains! #nature #adventure",
+		},
+		{
+			ID:      "01GQGDW16BGX8K6Q4NGNNTSNAE",
+			Author:  2,
+			LikedBy: []uint64{1, 3},
+			Content: "Can't wait for the weekend! Anyone up for a road trip? #roadtrip #friends",
+		},
+		{
+			ID:      "01GQGDW8F05WF7RQ8ZKTZM6TAW",
+			Author:  3,
+			LikedBy: []uint64{2, 4},
+			Content: "Just had the best sushi of my life! #foodie #yum",
+		},
+		{
+			ID:      "01GQGDWCVBXJK7Y16DNZ5M0B44",
+			Author:  4,
+			LikedBy: []uint64{1, 3},
+			Content: "Who's ready for some live music tonight? #concert #music",
+		},
+		{
+			ID:      "01GQGDWMVDFMKED8Z7T88PEY6Q",
+			Author:  5,
+			LikedBy: []uint64{2, 4},
+			Content: "Just landed in a new city! Excited to explore! #travel #citylife",
+		},
+		{
+			ID:      "01GQGDWZSR0K3B6NMFHM2WTDBE",
+			Author:  1,
+			LikedBy: []uint64{2, 5},
+			Content: "Who's ready for some football? #sports #gameon",
+		},
+		{
+			ID:      "01GQGDXA5FT6CND4YYJJYB5HYP",
+			Author:  2,
+			LikedBy: []uint64{1, 3},
+			Content: "Just finished reading a great book! #reading #bookworm",
+		},
+		{
+			ID:      "01GQGDXR7J8WJTNG4E6QAP5T02",
+			Author:  3,
+			LikedBy: []uint64{2, 4},
+			Content: "Who's up for a round of golf this weekend? #golf #weekendfun",
 		},
 	}
 
