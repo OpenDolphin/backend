@@ -114,7 +114,7 @@ func (s *Server) createDemoPosts() error {
 		{
 			ID:      "01GQGDW0E19PRG21S0DWS090X0",
 			Author:  1,
-			LikedBy: []uint64{2, 5},
+			LikedBy: []uint64{2, 3, 4, 5},
 			Content: "Just finished a great hike in the mountains! #nature #adventure",
 		},
 		{
@@ -126,13 +126,13 @@ func (s *Server) createDemoPosts() error {
 		{
 			ID:      "01GQGDW8F05WF7RQ8ZKTZM6TAW",
 			Author:  3,
-			LikedBy: []uint64{2, 4},
+			LikedBy: []uint64{1},
 			Content: "Just had the best sushi of my life! #foodie #yum",
 		},
 		{
 			ID:      "01GQGDWCVBXJK7Y16DNZ5M0B44",
 			Author:  4,
-			LikedBy: []uint64{1, 3},
+			LikedBy: []uint64{},
 			Content: "Who's ready for some live music tonight? #concert #music",
 		},
 		{
@@ -144,19 +144,19 @@ func (s *Server) createDemoPosts() error {
 		{
 			ID:      "01GQGDWZSR0K3B6NMFHM2WTDBE",
 			Author:  1,
-			LikedBy: []uint64{2, 5},
+			LikedBy: []uint64{2},
 			Content: "Who's ready for some football? #sports #gameon",
 		},
 		{
 			ID:      "01GQGDXA5FT6CND4YYJJYB5HYP",
 			Author:  2,
-			LikedBy: []uint64{1, 3},
+			LikedBy: []uint64{},
 			Content: "Just finished reading a great book! #reading #bookworm",
 		},
 		{
 			ID:      "01GQGDXR7J8WJTNG4E6QAP5T02",
 			Author:  3,
-			LikedBy: []uint64{2, 4},
+			LikedBy: []uint64{6},
 			Content: "Who's up for a round of golf this weekend? #golf #weekendfun",
 		},
 	}
