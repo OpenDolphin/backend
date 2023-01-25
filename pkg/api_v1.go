@@ -11,6 +11,7 @@ import (
 )
 
 func (s *Server) initAPIv1(g *gin.RouterGroup) {
+	g.GET("/users", s.apiV1GetUsers)
 	g.POST("/users", s.apiV1CreateUser)
 	g.GET("/users/@:username", s.apiV1UserByUsername)
 	g.GET("/users/:id", s.apiV1GetUserById)
@@ -24,6 +25,7 @@ func (s *Server) initAPIv1(g *gin.RouterGroup) {
 
 	g.GET("/posts", s.apiV1GetPosts)
 	g.GET("/posts/:id", s.apiV1GetSinglePost)
+	g.GET("/posts/:id/liked_by", s.apiV1PostLikedBy)
 
 	g.GET("/tags/:text", s.apiV1TagsByText)
 	g.GET("/tags/:text/posts", s.apiV1TagsGetPosts)

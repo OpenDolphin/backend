@@ -2,18 +2,13 @@ package main
 
 import (
 	"github.com/alexflint/go-arg"
-	"github.com/denysvitali/social/backend/pkg"
+	server "github.com/denysvitali/social/backend/pkg"
 	"github.com/sirupsen/logrus"
 )
 
 var args struct {
-	Debug *bool `arg:"-D"`
-
-	ArangoEndpoints []string `arg:"--arango-endpoints,env:ARANGO_ENDPOINTS"`
-	ArangoUsername  string   `arg:"--arango-username,env:ARANGO_USERNAME"`
-	ArangoPassword  string   `arg:"--arango-password,env:ARANGO_PASSWORD"`
-	ArangoDatabase  string   `arg:"--arango-database,env:ARANGO_DATABASE"`
-	PostgresDSN     string   `arg:"--postgres-dsn,env:DATABASE_URL"`
+	Debug       *bool  `arg:"-D"`
+	PostgresDSN string `arg:"--postgres-dsn,env:DATABASE_URL"`
 
 	IsDemo bool `arg:"env:DEMO_MODE" default:"false"`
 

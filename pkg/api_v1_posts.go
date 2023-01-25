@@ -2,12 +2,57 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"github.com/denysvitali/social/backend/pkg/models/api"
 	pgmodel "github.com/denysvitali/social/backend/pkg/models/postgres"
 	"github.com/gin-gonic/gin"
+	"github.com/oklog/ulid/v2"
 	"gorm.io/gorm"
 	"net/http"
 )
+
+func parsePostId(c *gin.Context) (*ulid.ULID, error) {
+	postId := c.Param("id")
+	u, err := ulid.Parse(postId)
+	if err != nil {
+		return nil, fmt.Errorf("invalid ULID")
+	}
+	return &u, nil
+}
+
+func (s *Server) apiV1GetSinglePost(c *gin.Context) {
+	postId, err := parsePostId(c)
+	if err != nil {
+		s.badRequest(c, fmt.Sprintf("unable to parse post id: %v", err), "invalid post id")
+		return
+	}
+
+	var post pgmodel.Post
+	tx := s.pgDB.
+		Preload("Author").
+		Model(pgmodel.Post{}).
+		Where("posts.id=?", postId).
+		Find(&post)
+
+	if tx.Error != nil {
+		s.internalServerError(c, "unable to fetch posts: %v", tx.Error)
+		return
+	}
+
+	if tx.RowsAffected == 0 {
+		s.notFound(c, "post not found")
+		return
+	}
+
+	// Get Author
+	a := s.getAuthor(post)
+	postsResponse := api.PostsResponse{
+		Posts: []api.Post{getApiPost(post)},
+		Users: []api.User{a},
+	}
+
+	c.JSON(http.StatusOK, postsResponse)
+}
 
 func (s *Server) apiV1PostsByAuthorUsername(c *gin.Context) {
 	username := c.Param("username")

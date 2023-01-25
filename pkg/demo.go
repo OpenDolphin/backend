@@ -67,8 +67,8 @@ func (s *Server) createDemoUsers() error {
 		},
 		{
 			ID:          6,
-			Username:    "samantha_j",
-			DisplayName: "Samantha Johnson",
+			Username:    "realnatalie",
+			DisplayName: "Natalie Davis",
 			Bio:         "Marketing professional and social media enthusiast",
 			BioPic:      unsplash.GetBioPic("KEHVSsRtnL0"),
 			ProfilePic:  unsplash.GetProfilePicture("-zqoE7jnQgw"),
@@ -109,6 +109,7 @@ func (s *Server) createDemoPosts() error {
 		Author  uint64
 		LikedBy []uint64
 		Content string
+		Likes   uint64
 	}
 	posts := []post{
 		{
@@ -177,6 +178,7 @@ func (s *Server) createDemoPosts() error {
 			AuthorID: p.Author,
 			Content:  p.Content,
 			LikedBy:  likedBy,
+			Likes:    uint64(len(likedBy)),
 		})
 
 		if tx.Error != nil {
